@@ -8,7 +8,7 @@ public class Wget implements Runnable {
     private final String url;
     private final int speed;
     private final String fileName;
-    private final long ms = 1_000_000;
+    private final long sec = 1_000;
 
     public Wget(String url, int speed, String fileName) {
         this.url = url;
@@ -30,17 +30,17 @@ public class Wget implements Runnable {
             byte[] dataBuffer = new byte[512];
             int bytesRead;
             int byteCount = 0;
-            long readStart = System.nanoTime();
+            long readStart = System.currentTimeMillis();
             while ((bytesRead = input.read(dataBuffer)) != -1) {
                 output.write(dataBuffer, 0, bytesRead);
-                long readEnd = System.nanoTime();
+                long readEnd = System.currentTimeMillis();
                 byteCount += bytesRead;
                 if (byteCount >= speed) {
-                    long sleepTime = (readEnd - readStart) < ms ? ms - (readEnd - readStart) : 0L;
-                    Thread.sleep(0, (int) sleepTime);
-                    System.out.println("bytes: " + byteCount + " " + "nanos: " + (System.nanoTime() - readStart));
+                    long sleepTime = (readEnd - readStart) < sec ? sec - (readEnd - readStart) : 0L;
+                    Thread.sleep(sleepTime);
+                    System.out.println("bytes: " + byteCount + " " + "ms: " + (System.currentTimeMillis() - readStart));
                     byteCount = 0;
-                    readStart = System.nanoTime();
+                    readStart = System.currentTimeMillis();
                 }
             }
             output.flush();
