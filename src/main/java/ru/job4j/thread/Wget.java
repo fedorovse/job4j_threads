@@ -36,15 +36,17 @@ public class Wget implements Runnable {
                 long readEnd = System.currentTimeMillis();
                 byteCount += bytesRead;
                 if (byteCount >= speed) {
-                    long sleepTime = (readEnd - readStart) < sec ? sec - (readEnd - readStart) : 0L;
-                    Thread.sleep(sleepTime);
+                    long sleepTime = readEnd - readStart;
+                    if (sleepTime < sec) {
+                        Thread.sleep(sec - sleepTime);
+                    }
                     System.out.println("bytes: " + byteCount + " " + "ms: " + (System.currentTimeMillis() - readStart));
                     byteCount = 0;
                     readStart = System.currentTimeMillis();
                 }
             }
             output.flush();
-            System.out.println(Files.size(file.toPath()) + " bytes");
+            System.out.println(Files.size(file.toPath()) + " bytes" + " total time: " + (System.currentTimeMillis() - startAt));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
