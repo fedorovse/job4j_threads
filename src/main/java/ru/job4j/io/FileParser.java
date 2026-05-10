@@ -1,18 +1,19 @@
 package ru.job4j.io;
 
 import java.io.*;
-import java.util.function.Predicate;
+import java.util.function.IntPredicate;
 
-public class ParseFile {
+public class FileParser {
 
-    public void saveContent(String content, SynchroFile file) throws IOException {
-        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(file.getFile()))) {
-            out.write(content.getBytes());
-            out.flush();
-        }
+    public String getContent(SynchroFile file) throws IOException {
+        return content(integer -> integer > 0, file);
     }
 
-    public String content(Predicate<Integer> filter, SynchroFile file) throws IOException {
+    public String getContentWithoutUnicode(SynchroFile file) throws IOException {
+        return content(integer -> (integer > 0) && (integer < 0x80), file);
+    }
+
+    public String content(IntPredicate filter, SynchroFile file) throws IOException {
 
         try (InputStream input = new BufferedInputStream(new FileInputStream(file.getFile()))) {
             StringBuilder sb = new StringBuilder();
@@ -20,7 +21,7 @@ public class ParseFile {
             int data;
             while ((data = input.read(buffer)) != -1) {
                 for (int i = 0; i < data; i++) {
-                    if (filter.test(buffer[i] & 0xFF)) {
+                    if (filter.test(buffer[i])) {
                         sb.append((char) buffer[i]);
                     }
                 }
