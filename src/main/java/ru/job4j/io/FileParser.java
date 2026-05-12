@@ -4,18 +4,23 @@ import java.io.*;
 import java.util.function.IntPredicate;
 
 public class FileParser {
+    private final File file;
 
-    public String getContent(SynchroFile file) throws IOException {
-        return content(integer -> integer > 0, file);
+    public FileParser(File file) {
+        this.file = file;
     }
 
-    public String getContentWithoutUnicode(SynchroFile file) throws IOException {
-        return content(integer -> (integer > 0) && (integer < 0x80), file);
+    public synchronized String getContent() throws IOException {
+        return content(integer -> integer > 0);
     }
 
-    public String content(IntPredicate filter, SynchroFile file) throws IOException {
+    public synchronized String getContentWithoutUnicode() throws IOException {
+        return content(integer -> (integer > 0) && (integer < 0x80));
+    }
 
-        try (InputStream input = new BufferedInputStream(new FileInputStream(file.getFile()))) {
+    private String content(IntPredicate filter) throws IOException {
+
+        try (InputStream input = new BufferedInputStream(new FileInputStream(file))) {
             StringBuilder sb = new StringBuilder();
             byte[] buffer = new byte[1024];
             int data;
